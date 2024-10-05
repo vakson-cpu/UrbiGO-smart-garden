@@ -1,6 +1,4 @@
-Sm
-
-art Garden
+Smart Garden
 
 The UrbiGO smart garden project - purchase and maintenance, found and monitored by administrators. Records of users and their gardens:
 
