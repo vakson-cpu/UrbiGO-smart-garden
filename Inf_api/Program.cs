@@ -9,19 +9,40 @@ using Microsoft.Extensions.DependencyInjection;
 var builder = WebApplication.CreateBuilder(args);
 ConfigurationManager configuration = builder.Configuration;
 
+// Add CORS policy
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAllOrigins", builder =>
+    {
+        builder.AllowAnyOrigin()
+               .AllowAnyMethod()
+               .AllowAnyHeader();
+    });
+});
+
 builder.Services.AddLogging();
-builder.Services.AddDatabaseConnection(configuration); //Configuring Db connection
+builder.Services.AddDatabaseConnection(configuration); // Configuring Db connection
+
 builder.Services
     .AddIdentity<AppUser, AppRoles>()
     .AddRoles<AppRoles>()
     .AddEntityFrameworkStores<InfDbContext>();
 
-builder.Services.AddPresentation(); //Configuring swagger and api controller
+builder.Services.AddPresentation(); // Configuring Swagger and API controller
+builder.Services.AddAuthorizationConfiguration(configuration); // Configure Jwt Options
 builder.Services.AddTransient<GlobalExceptionHandlingMiddleware>();
-builder.Services.AddScopes(); //Adding dependency Injection
-builder.Services.AddAuthorizationConfiguration(configuration); //Configure Jwt Options
+builder.Services.AddScopes(); // Adding dependency injection
 
 var app = builder.Build();
+
+// Apply CORS policy
+app.UseCors("AllowAllOrigins");
+
+// Ensure the CORS middleware is added before UseAuthorization and UseAuthentication
+app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
+app.UseAuthentication();
+app.UseAuthorization();
+
 using (var serviceScope = app.Services.CreateScope())
 {
     var roleManager = serviceScope.ServiceProvider.GetRequiredService<RoleManager<AppRoles>>();
@@ -38,12 +59,7 @@ using (var serviceScope = app.Services.CreateScope())
         await roleManager.CreateAsync(adminRole);
     }
 }
-app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
-app.UseCors(
-    x => x.AllowAnyMethod().AllowAnyHeader().SetIsOriginAllowed(origin => true).AllowCredentials()
-);
-app.UseAuthentication();
-app.UseAuthorization();
+
 app.MapControllers();
 
 if (app.Environment.IsDevelopment())
