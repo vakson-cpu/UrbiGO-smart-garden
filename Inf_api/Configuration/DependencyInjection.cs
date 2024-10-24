@@ -3,7 +3,11 @@ using System.Text;
 // using System.Text;
 using System.Text.Json.Serialization;
 using Inf_api.Services.Auth;
+using Inf_api.Services.Plant;
+using Inf_api.Services.PlantSpecs;
 using Inf_Data;
+using Inf_Repository.Repository.Plant;
+using Inf_Repository.Repository.PlantSpecs;
 using Inf_Repository.Repository.UnitOfWork;
 using Inf_Repository.Repository.User;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -73,9 +77,13 @@ namespace Inf_api.Configuration
         public static IServiceCollection AddScopes(this IServiceCollection Services)
         {
             Services.AddScoped<IUserRepository, UserRepository>();
+            Services.AddTransient<IPlantRepository, PlantRepository>();
+            Services.AddScoped<IPlantService, PlantService>();  
             Services.AddScoped<IUnitOfWork, UnitOfWork>();
             Services.AddScoped<ITokenService,TokenService>();
             Services.AddTransient<IAuthService, AuthService>();
+            Services.AddScoped<IPlantSpecificationRepository, PlantSpecificationRepostiory>();
+            Services.AddScoped<IPlantSpecService,PlantSpecService>();
             return Services;
         }
 
