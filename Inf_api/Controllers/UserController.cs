@@ -12,9 +12,12 @@ namespace Inf_api.Controllers
     {
         public IAuthService _authService { get; set; }
 
-        public UserController(IAuthService authService)
+        public IUnitOfWork _unitOfWork { get; set; }
+
+        public UserController(IAuthService authService,IUnitOfWork unitOfWork)
         {
             this._authService = authService;
+            this._unitOfWork = unitOfWork;  
         }
 
         [HttpPost("Register")]
@@ -37,6 +40,12 @@ namespace Inf_api.Controllers
             if (result.succeeded)
                 return Ok(result);
             return BadRequest(result);
+        }
+        [HttpGet("GetAllUsers")]
+        public async Task<IActionResult> GetAllUsers()
+        {
+            var result = await _unitOfWork.UserRepository.GetUsers();
+            return Ok(result);
         }
     }
 }
