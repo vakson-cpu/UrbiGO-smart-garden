@@ -16,7 +16,7 @@ namespace Inf_api.Services.Auth
         public async Task<string> GenerateToken(AppUser user, string role)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_config["Key"]);
+            var key = Encoding.ASCII.GetBytes(_config["Jwt:Key"]);
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new System.Security.Claims.ClaimsIdentity(new[]
