@@ -4,6 +4,7 @@ using Inf_Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Inf_Data.Migrations
 {
     [DbContext(typeof(InfDbContext))]
-    partial class InfDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241022233204_AddSpecieNamePlantSpecs")]
+    partial class AddSpecieNamePlantSpecs
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -66,6 +68,9 @@ namespace Inf_Data.Migrations
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("DeatPlantCount")
+                        .HasColumnType("int");
 
                     b.Property<string>("Email")
                         .HasMaxLength(256)
@@ -158,6 +163,9 @@ namespace Inf_Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
+                    b.Property<int?>("AppUserId")
+                        .HasColumnType("int");
+
                     b.Property<float>("CurrentIllumination")
                         .HasColumnType("real");
 
@@ -180,12 +188,14 @@ namespace Inf_Data.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("AppUserId");
+
                     b.HasIndex("PlantSpecificationId");
 
                     b.ToTable("Plants");
                 });
 
-            modelBuilder.Entity("Inf_Data.Entities.PlantSpecifications", b =>
+            modelBuilder.Entity("Inf_Data.Entities.PlantSpecificaitons", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -193,22 +203,22 @@ namespace Inf_Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<decimal>("Illumination")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<float>("Illumination")
+                        .HasColumnType("real");
 
                     b.Property<string>("SpecieName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<decimal>("Temperature")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<float>("Temperature")
+                        .HasColumnType("real");
 
-                    b.Property<decimal>("Wattering")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<double>("Wattering")
+                        .HasColumnType("float");
 
                     b.HasKey("Id");
 
-                    b.ToTable("PlantSpecifications");
+                    b.ToTable("PlantSpecificaitons");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
@@ -317,7 +327,7 @@ namespace Inf_Data.Migrations
             modelBuilder.Entity("Inf_Data.Entities.Device", b =>
                 {
                     b.HasOne("Inf_Data.Entities.AppUser", "AssignedToUser")
-                        .WithMany()
+                        .WithMany("Devices")
                         .HasForeignKey("AssignedToUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -333,8 +343,12 @@ namespace Inf_Data.Migrations
 
             modelBuilder.Entity("Inf_Data.Entities.Plant", b =>
                 {
-                    b.HasOne("Inf_Data.Entities.PlantSpecifications", "PlantSpecification")
-                        .WithMany()
+                    b.HasOne("Inf_Data.Entities.AppUser", null)
+                        .WithMany("Plants")
+                        .HasForeignKey("AppUserId");
+
+                    b.HasOne("Inf_Data.Entities.PlantSpecificaitons", "PlantSpecification")
+                        .WithMany("Plants")
                         .HasForeignKey("PlantSpecificationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -391,6 +405,18 @@ namespace Inf_Data.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Inf_Data.Entities.AppUser", b =>
+                {
+                    b.Navigation("Devices");
+
+                    b.Navigation("Plants");
+                });
+
+            modelBuilder.Entity("Inf_Data.Entities.PlantSpecificaitons", b =>
+                {
+                    b.Navigation("Plants");
                 });
 #pragma warning restore 612, 618
         }
