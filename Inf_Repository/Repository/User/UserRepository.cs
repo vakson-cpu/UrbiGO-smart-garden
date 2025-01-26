@@ -5,12 +5,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Inf_Repository.Repository.User;
 
-public class IUserRepository : GenericRepository<AppUser>,IUserRepository
+public class UserRepository : GenericRepository<AppUser>,IUserRepository
 {
     private  InfDbContext _context { get; set; }
     
     
-    public IUserRepository(InfDbContext context) : base(context)
+    public UserRepository(InfDbContext context) : base(context)
     {
         this._context=context;
     }
