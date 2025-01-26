@@ -15,6 +15,8 @@ public class InfDbContext : IdentityDbContext<AppUser, AppRoles, int>
     public virtual DbSet<Device> Devices { get; set; }
 
     public virtual DbSet<PlantSpecifications> PlantSpecifications { get; set; }
+
+    public virtual DbSet<Notifications> Notifications { get; set; }
     protected override async void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);

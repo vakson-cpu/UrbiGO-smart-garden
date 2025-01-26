@@ -59,14 +59,20 @@ namespace Inf_api.Services.Auth
 
         public async Task<CustomResponse<string>> Register(CreateUserDTO newUser)
         {
-            AppUser user = new AppUser() { Email = newUser.Email, UserName = newUser.UserName };
-            var result = await this._userManager.CreateAsync(user, newUser.Password);
-            await this._userManager.AddToRoleAsync(user, "User");
-            await this._unitOfWork.SaveChanges();
-            var message = Extensions.EnumExtension.GetEnumDescription(
-                ResponseMessages.REGISTRATION_SUCCEEDED
-            );
-            return new CustomResponse<string>(message, true, message);
+            try
+            {
+                AppUser user = new AppUser() { Email = newUser.Email, UserName = newUser.UserName };
+                var result = await this._userManager.CreateAsync(user, newUser.Password);
+                await this._userManager.AddToRoleAsync(user, "User");
+                await this._unitOfWork.SaveChanges();
+                var message = Extensions.EnumExtension.GetEnumDescription(
+                    ResponseMessages.REGISTRATION_SUCCEEDED
+                );
+                return new CustomResponse<string>(message, true, message);
+            }catch(Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
         }
     }
 }

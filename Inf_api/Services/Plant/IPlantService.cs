@@ -9,5 +9,9 @@ namespace Inf_api.Services.Plant
     {
         Task<CustomResponse<Inf_Data.Entities.Plant>> AddPlant(PlantsDtos addPlant);
         Task<CustomResponse<List<Inf_Data.Entities.Plant>>> GetAllPlants();
+
+        Task<CustomResponse<Inf_Data.Entities.Plant>> BuyPlant(int userId, int plantSpecId);
+
+        Task<CustomResponse<List<Inf_Data.Entities.Plant>>> GetUsersPlants(int userId);
     }
 }

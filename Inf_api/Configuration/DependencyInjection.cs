@@ -2,10 +2,17 @@ using System.Security.Claims;
 using System.Text;
 // using System.Text;
 using System.Text.Json.Serialization;
+using Inf_api.Helpers;
+using Inf_api.Jobs;
 using Inf_api.Services.Auth;
+using Inf_api.Services.Devices;
+using Inf_api.Services.Notifications;
 using Inf_api.Services.Plant;
 using Inf_api.Services.PlantSpecs;
+using Inf_api.SignalrRNotifications;
 using Inf_Data;
+using Inf_Repository.Repository.Devices;
+using Inf_Repository.Repository.Notifications;
 using Inf_Repository.Repository.Plant;
 using Inf_Repository.Repository.PlantSpecs;
 using Inf_Repository.Repository.UnitOfWork;
@@ -76,7 +83,7 @@ namespace Inf_api.Configuration
 
         public static IServiceCollection AddScopes(this IServiceCollection Services)
         {
-            Services.AddScoped<IUserRepository, UserRepository>();
+            Services.AddScoped<IUserRepository, IUserRepository>();
             Services.AddTransient<IPlantRepository, PlantRepository>();
             Services.AddScoped<IPlantService, PlantService>();  
             Services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -84,6 +91,12 @@ namespace Inf_api.Configuration
             Services.AddTransient<IAuthService, AuthService>();
             Services.AddScoped<IPlantSpecificationRepository, PlantSpecificationRepostiory>();
             Services.AddScoped<IPlantSpecService,PlantSpecService>();
+            Services.AddScoped<IDeviceService,DeviceService>();
+            Services.AddTransient<IDeviceRepository, DeviceRepository>();
+            Services.AddTransient<IPlantHelper, PlantHelper>();
+            Services.AddScoped<IRandomizePLantHealthJob, RandomizePlantHealthJob>();
+            Services.AddScoped<Inf_Repository.Repository.Notifications.INotificationRepository, NotificationRepository>();
+            Services.AddScoped<ISignalRService, SignalRService>();
             return Services;
         }
 

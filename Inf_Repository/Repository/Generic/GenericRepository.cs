@@ -16,8 +16,11 @@ public class GenericRepository<T>:IGenericRepository<T> where T : class
     public IQueryable<T> GetAll()
     {
     return this.table.AsNoTracking().AsQueryable();   
-     }
-
+    }
+    public IQueryable<T> GetAllWithTracking()
+    {
+        return this.table.AsQueryable();
+    }
     public async Task<T> GetById(int id)
     {
         return await this.table.FindAsync(id);

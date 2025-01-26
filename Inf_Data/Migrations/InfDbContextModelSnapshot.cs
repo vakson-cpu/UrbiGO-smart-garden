@@ -145,9 +145,42 @@ namespace Inf_Data.Migrations
 
                     b.HasIndex("AssignedToUserId");
 
-                    b.HasIndex("PlantToMonitorId");
+                    b.HasIndex("PlantToMonitorId")
+                        .IsUnique()
+                        .HasFilter("[PlantToMonitorId] IS NOT NULL");
 
                     b.ToTable("Devices");
+                });
+
+            modelBuilder.Entity("Inf_Data.Entities.Notifications", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("NotificaitonType")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Notifications");
                 });
 
             modelBuilder.Entity("Inf_Data.Entities.Plant", b =>
@@ -158,6 +191,13 @@ namespace Inf_Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
+                    b.Property<DateTime?>("BoughtAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<float>("CurrentIllumination")
                         .HasColumnType("real");
 
@@ -167,6 +207,9 @@ namespace Inf_Data.Migrations
                     b.Property<double>("CurrentWattering")
                         .HasColumnType("float");
 
+                    b.Property<bool>("IsHealthy")
+                        .HasColumnType("bit");
+
                     b.Property<string>("LatinName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -175,12 +218,23 @@ namespace Inf_Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("PlantHealth")
+                        .HasColumnType("int");
+
                     b.Property<int>("PlantSpecificationId")
+                        .HasColumnType("int");
+
+                    b.Property<double>("Price")
+                        .HasColumnType("float");
+
+                    b.Property<int>("UserId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
                     b.HasIndex("PlantSpecificationId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Plants");
                 });
@@ -192,6 +246,9 @@ namespace Inf_Data.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<int>("Count")
+                        .HasColumnType("int");
 
                     b.Property<decimal>("Illumination")
                         .HasColumnType("decimal(18,2)");
@@ -323,23 +380,42 @@ namespace Inf_Data.Migrations
                         .IsRequired();
 
                     b.HasOne("Inf_Data.Entities.Plant", "PlantToMonitor")
-                        .WithMany()
-                        .HasForeignKey("PlantToMonitorId");
+                        .WithOne("Device")
+                        .HasForeignKey("Inf_Data.Entities.Device", "PlantToMonitorId");
 
                     b.Navigation("AssignedToUser");
 
                     b.Navigation("PlantToMonitor");
                 });
 
+            modelBuilder.Entity("Inf_Data.Entities.Notifications", b =>
+                {
+                    b.HasOne("Inf_Data.Entities.AppUser", "User")
+                        .WithMany("Notifications")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Inf_Data.Entities.Plant", b =>
                 {
                     b.HasOne("Inf_Data.Entities.PlantSpecifications", "PlantSpecification")
-                        .WithMany()
+                        .WithMany("Plants")
                         .HasForeignKey("PlantSpecificationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Inf_Data.Entities.AppUser", "User")
+                        .WithMany("Plants")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("PlantSpecification");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
@@ -391,6 +467,23 @@ namespace Inf_Data.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Inf_Data.Entities.AppUser", b =>
+                {
+                    b.Navigation("Notifications");
+
+                    b.Navigation("Plants");
+                });
+
+            modelBuilder.Entity("Inf_Data.Entities.Plant", b =>
+                {
+                    b.Navigation("Device");
+                });
+
+            modelBuilder.Entity("Inf_Data.Entities.PlantSpecifications", b =>
+                {
+                    b.Navigation("Plants");
                 });
 #pragma warning restore 612, 618
         }

@@ -7,5 +7,7 @@ namespace Inf_api.Services.PlantSpecs
     {
         Task<QueryResponse<PlantSpecifications>> GetAllPlantSpecs(string search,int pageSize=10, int page = 1);
             
-            }
+    
+    
+    }
 }

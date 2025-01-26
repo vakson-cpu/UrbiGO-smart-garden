@@ -47,5 +47,6 @@ namespace Inf_api.Controllers
             var result = await _unitOfWork.UserRepository.GetUsers();
             return Ok(result);
         }
+
     }
 }

@@ -1,12 +1,6 @@
 ﻿using Inf_Data;
-using Inf_Data.Entities;
 using Inf_Repository.Repository.Generic;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Inf_Repository.Repository.Plant
 {
@@ -30,6 +24,58 @@ namespace Inf_Repository.Repository.Plant
                 throw new Exception(ex.ToString());
             }
         }
-        
+
+        public async Task<Inf_Data.Entities.Plant> BuyPlant(int specieId, int userId)
+        {
+            try
+            {
+                var result = await _context.PlantSpecifications
+                    .Where(item => item.Id == specieId)
+                    .FirstOrDefaultAsync();
+
+                if (result is null) return null;
+
+                // Initialize Random instance
+                Random random = new Random();
+
+                var plant = new Inf_Data.Entities.Plant()
+                {
+                    LatinName = result.SpecieName,
+                    LocalName = result.SpecieName,
+                    CurrentIllumination = GenerateRandomValue((float)result.Illumination, random),
+                    PlantSpecificationId = result.Id,
+                    PlantSpecification = result,
+                    CurrentWattering = GenerateRandomValue((double)result.Wattering, random),
+                    CurrentTemperature = GenerateRandomValue((float)result.Temperature, random),
+                    UserId = userId
+                };
+
+                result.Count -= 1; // Reduce the count of available plants in specifications
+
+                await _context.Plants.AddAsync(plant);
+                await _context.SaveChangesAsync();
+                return plant;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
+
+        // Helper method to generate a random value within ±5 range
+        private static float GenerateRandomValue(float baseValue, Random random)
+        {
+            float min = baseValue - 5;
+            float max = baseValue + 5;
+            return (float)(random.NextDouble() * (max - min) + min);
+        }
+
+        private static double GenerateRandomValue(double baseValue, Random random)
+        {
+            double min = baseValue - 5;
+            double max = baseValue + 5;
+            return random.NextDouble() * (max - min) + min;
+        }
+
     }
 }

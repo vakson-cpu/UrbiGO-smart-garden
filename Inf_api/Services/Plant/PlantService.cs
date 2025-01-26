@@ -4,6 +4,7 @@ using Inf_Data.Entities;
 using Inf_Repository.Repository.UnitOfWork;
 using Inf_Transfer.DTOS.PlantsDtos;
 using Inf_Transfer.utils;
+using Microsoft.EntityFrameworkCore;
 
 namespace Inf_api.Services.Plant
 {
@@ -43,6 +44,22 @@ namespace Inf_api.Services.Plant
             );
             return response;
         }
+        public async Task<CustomResponse<Inf_Data.Entities.Plant>> BuyPlant(int userId,int plantSpecId)
+        {
 
+            var result = await _unitOfWork.PlantRepository.BuyPlant(plantSpecId,userId);
+
+            if (result == null) return new CustomResponse<Inf_Data.Entities.Plant>(ResponseMessages.REQUEST_FAILED.GetEnumDescription(), false, null);
+            return new CustomResponse<Inf_Data.Entities.Plant>(ResponseMessages.REQUEST_SUCCEEDED.GetEnumDescription(), true, result);
+        }
+
+        public async Task<CustomResponse<List<Inf_Data.Entities.Plant>>> GetUsersPlants(int userId)
+        {
+            var plantQuery = _unitOfWork.PlantRepository.GetAllWithTracking();
+
+            var result = await plantQuery.Where(item => item.UserId == userId).Include(x=>x.Device).ToListAsync();
+
+            return new CustomResponse<List<Inf_Data.Entities.Plant>>(ResponseMessages.REQUEST_SUCCEEDED.GetEnumDescription(), true, result);
+        }
     }
 }
