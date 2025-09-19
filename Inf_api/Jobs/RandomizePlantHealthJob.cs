@@ -52,13 +52,20 @@ namespace Inf_api.Jobs
                     {
                         UserId = plant.UserId,
                         Text = healthStatus == NotificationType.Warning
-                            ? $"Warning: Plant {plant.LocalName} is close to dying."
-                            : $"Error: Plant {plant.LocalName} has died.",
+                            ? $"Warning: Plant {plant.LocalName} with code {plant.Code}  is close to dying."
+                            : $"Error: Plant {plant.LocalName} with code {plant.Code} has died.",
                         Date = DateTime.UtcNow,
                         IsRead = false,
                         NotificaitonType= (Inf_Data.Enums.NotificaitonType)healthStatus
                     };
-
+                    if(healthStatus == NotificationType.Error)
+                    {
+                        var user = await _context.Users.FindAsync(plant.UserId);
+                        if (user != null)
+                        {
+                            user.NumberOfDeadPlants++;
+                        }
+                    }
                     // Send real-time notification
                     await _signalRService.NotifyUser(notification);
 

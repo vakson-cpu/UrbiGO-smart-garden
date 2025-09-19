@@ -21,7 +21,9 @@ builder.Services.AddCors(options => options.AddPolicy("CorsPolicy",
                    .SetIsOriginAllowed((host) => true)
                    .AllowCredentials();
         }));
-builder.Services.AddLogging();
+builder.Logging.ClearProviders();       // remove all default providers
+builder.Logging.AddConsole();           // keep console logging
+builder.Logging.AddDebug();             // optional
 builder.Services.AddDatabaseConnection(configuration); // Configuring Db connection
 
 builder.Services

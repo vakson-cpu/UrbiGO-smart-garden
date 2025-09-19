@@ -1,4 +1,5 @@
 using Inf_api.Services.Auth;
+using Inf_api.Services.UserServices;
 using Inf_Repository.Repository.UnitOfWork;
 using Inf_Transfer.DTOS.UserDTOs;
 using Inf_Transfer.utils;
@@ -13,11 +14,12 @@ namespace Inf_api.Controllers
         public IAuthService _authService { get; set; }
 
         public IUnitOfWork _unitOfWork { get; set; }
-
-        public UserController(IAuthService authService,IUnitOfWork unitOfWork)
+        private readonly IUserService _userService;
+        public UserController(IAuthService authService,IUnitOfWork unitOfWork,IUserService userService)
         {
             this._authService = authService;
-            this._unitOfWork = unitOfWork;  
+            this._unitOfWork = unitOfWork;
+            _userService = userService;
         }
 
         [HttpPost("Register")]
@@ -45,6 +47,14 @@ namespace Inf_api.Controllers
         public async Task<IActionResult> GetAllUsers()
         {
             var result = await _unitOfWork.UserRepository.GetUsers();
+            return Ok(result);
+        }
+
+        [HttpGet("GetUserTable")]
+
+        public async Task<IActionResult> GetUserTable(int pageNumber, int pageSize)
+        {
+            var result = await _userService.GetUsers(pageNumber, pageSize);
             return Ok(result);
         }
 

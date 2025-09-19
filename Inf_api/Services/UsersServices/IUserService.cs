@@ -1,6 +1,10 @@
-﻿namespace Inf_api.Services.UserServices
+﻿using Inf_Data.Entities;
+using Inf_Transfer.utils;
+
+namespace Inf_api.Services.UserServices
 {
     public interface IUserService
     {
+        Task<QueryResponse<AppUser>> GetUsers(int pageNumber, int pageSize = 10);
     }
 }

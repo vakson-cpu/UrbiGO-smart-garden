@@ -59,20 +59,38 @@ namespace Inf_api.Services.Auth
 
         public async Task<CustomResponse<string>> Register(CreateUserDTO newUser)
         {
-            try
+            // Create the user object
+            var user = new AppUser
             {
-                AppUser user = new AppUser() { Email = newUser.Email, UserName = newUser.UserName };
-                var result = await this._userManager.CreateAsync(user, newUser.Password);
-                await this._userManager.AddToRoleAsync(user, "User");
-                await this._unitOfWork.SaveChanges();
-                var message = Extensions.EnumExtension.GetEnumDescription(
-                    ResponseMessages.REGISTRATION_SUCCEEDED
-                );
-                return new CustomResponse<string>(message, true, message);
-            }catch(Exception ex)
+                Email = newUser.Email,
+                UserName = newUser.UserName
+            };
+
+            // Try to create the user with password
+            var result = await _userManager.CreateAsync(user, newUser.Password);
+
+            if (!result.Succeeded)
             {
-                throw new Exception(ex.ToString());
+                // Collect errors
+                var errors = string.Join("; ", result.Errors.Select(e => e.Description));
+                return new CustomResponse<string>(errors, false, errors);
             }
+
+            // Assign default role
+            var roleResult = await _userManager.AddToRoleAsync(user, "User");
+
+            if (!roleResult.Succeeded)
+            {
+                var errors = string.Join("; ", roleResult.Errors.Select(e => e.Description));
+                return new CustomResponse<string>(errors, false, errors);
+            }
+
+            // If you really need to save extra changes outside Identity
+            await _unitOfWork.SaveChanges();
+
+            var message = Extensions.EnumExtension.GetEnumDescription(ResponseMessages.REGISTRATION_SUCCEEDED);
+            return new CustomResponse<string>(message, true, message);
         }
+
     }
 }

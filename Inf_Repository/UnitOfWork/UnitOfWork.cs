@@ -18,7 +18,7 @@ public class UnitOfWork : IUnitOfWork
     public UnitOfWork(InfDbContext context)
     {
         this._context = context;
-        this.UserRepository = new IUserRepository(context);
+        this.UserRepository = new UserRepository(context);
         this.PlantRepository = new PlantRepository(context);
         this.DeviceRepository = new DeviceRepository(context);
         this.plantSpecificationRepository = new PlantSpecificationRepostiory(context);

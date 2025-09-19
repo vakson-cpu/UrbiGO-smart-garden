@@ -9,6 +9,7 @@ using Inf_api.Services.Devices;
 using Inf_api.Services.Notifications;
 using Inf_api.Services.Plant;
 using Inf_api.Services.PlantSpecs;
+using Inf_api.Services.UserServices;
 using Inf_api.SignalrRNotifications;
 using Inf_Data;
 using Inf_Repository.Repository.Devices;
@@ -83,7 +84,7 @@ namespace Inf_api.Configuration
 
         public static IServiceCollection AddScopes(this IServiceCollection Services)
         {
-            Services.AddScoped<IUserRepository, IUserRepository>();
+            Services.AddScoped<IUserRepository, UserRepository>();
             Services.AddTransient<IPlantRepository, PlantRepository>();
             Services.AddScoped<IPlantService, PlantService>();  
             Services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -97,6 +98,7 @@ namespace Inf_api.Configuration
             Services.AddScoped<IRandomizePLantHealthJob, RandomizePlantHealthJob>();
             Services.AddScoped<Inf_Repository.Repository.Notifications.INotificationRepository, NotificationRepository>();
             Services.AddScoped<ISignalRService, SignalRService>();
+            Services.AddScoped<IUserService, UserService>();
             return Services;
         }
 
