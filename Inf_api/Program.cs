@@ -78,7 +78,16 @@ RecurringJob.AddOrUpdate<IRandomizePLantHealthJob>(
 
 app.UseRouting(); // Add routing middleware here
 app.UseAuthorization();
-
+app.MapGet("/", () => Results.Ok(new { status = "ok" }));
+app.MapGet("/healthz", () => Results.Ok(new
+{
+    status = "ok",
+    env = app.Environment.EnvironmentName,
+    timeUtc = DateTimeOffset.UtcNow
+}));
+app.MapGet("/__debug/headers", (HttpRequest req) =>
+    Results.Json(req.Headers.ToDictionary(h => h.Key, h => h.Value.ToString()))
+);
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllers(); // Map controllers
