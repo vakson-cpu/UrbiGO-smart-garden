@@ -6,94 +6,72 @@ using Inf_api.SignalrRNotifications;
 using Inf_Data;
 using Inf_Data.Entities;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
-ConfigurationManager configuration = builder.Configuration;
+var configuration = builder.Configuration;
 
-// Add CORS policy
-builder.Services.AddCors(options => options.AddPolicy("CorsPolicy",
-        builder =>
-        {
-            builder.AllowAnyHeader()
-                   .AllowAnyMethod()
-                   .SetIsOriginAllowed((host) => true)
-                   .AllowCredentials();
-        }));
-builder.Logging.ClearProviders();       // remove all default providers
-builder.Logging.AddConsole();           // keep console logging
-builder.Logging.AddDebug();             // optional
-builder.Services.AddDatabaseConnection(configuration); // Configuring Db connection
+// Services
+builder.Services.AddCors(o => o.AddPolicy("CorsPolicy", p =>
+    p.AllowAnyHeader().AllowAnyMethod().SetIsOriginAllowed(_ => true).AllowCredentials()));
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+builder.Logging.AddDebug();
+
+builder.Services.AddDatabaseConnection(configuration);
 
 builder.Services
     .AddIdentity<AppUser, AppRoles>()
     .AddRoles<AppRoles>()
     .AddEntityFrameworkStores<InfDbContext>();
-builder.Services.AddSignalR();
 
-builder.Services.AddPresentation(); // Configuring Swagger and API controller
-builder.Services.AddAuthorizationConfiguration(configuration); // Configure Jwt Options
+builder.Services.AddSignalR();
+builder.Services.AddControllers();                     // <-- ensure controllers are registered
+builder.Services.AddPresentation();                    // Swagger + MVC options (ok to keep)
+builder.Services.AddAuthorizationConfiguration(configuration);
 builder.Services.AddTransient<GlobalExceptionHandlingMiddleware>();
-builder.Services.AddScopes(); // Adding dependency injection
-builder.Services.AddScoped<IRandomizePLantHealthJob, RandomizePlantHealthJob>(); // Register the job in DI
+builder.Services.AddScopes();
+
+builder.Services.AddScoped<IRandomizePLantHealthJob, RandomizePlantHealthJob>();
 builder.Services.AddHangfire(conf =>
-{
-    conf.UseSqlServerStorage(configuration.GetConnectionString("InformacioniSistemi"));
-});
+    conf.UseSqlServerStorage(configuration.GetConnectionString("InformacioniSistemi")));
 builder.Services.AddHangfireServer();
 
 var app = builder.Build();
 
-// Apply CORS policy
-app.UseCors("CorsPolicy");
-// Ensure the CORS middleware is added before UseAuthorization and UseAuthentication
+// ---- PIPELINE ORDER ----
 app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
-app.UseAuthentication();
 
-using (var serviceScope = app.Services.CreateScope())
-{
-    var roleManager = serviceScope.ServiceProvider.GetRequiredService<RoleManager<AppRoles>>();
+app.UseRouting();                   // 1) routing
+app.UseCors("CorsPolicy");          // 2) cors (after routing, before auth)
+app.UseAuthentication();            // 3) auth
+app.UseAuthorization();             // 4) authorization
 
-    if (!await roleManager.RoleExistsAsync("User"))
-    {
-        var userRole = new AppRoles("User");
-        await roleManager.CreateAsync(userRole);
-    }
-
-    if (!await roleManager.RoleExistsAsync("Admin"))
-    {
-        var adminRole = new AppRoles("Admin");
-        await roleManager.CreateAsync(adminRole);
-    }
-}
-
-app.UseHangfireDashboard("/hangfire");
-// Register Hangfire recurring job
-RecurringJob.AddOrUpdate<IRandomizePLantHealthJob>(
-    "RandomizePlantHealth",
-    job => job.RandomlyAdjustStateOfThePlant(),
-    Cron.Hourly // Adjust frequency as needed
-);
-
-app.UseRouting(); // Add routing middleware here
-app.UseAuthorization();
-app.MapGet("/", () => Results.Ok(new { status = "ok" }));
+// --- Minimal test endpoints (anonymous) ---
+app.MapGet("/", () => Results.Ok(new { status = "ok" })).AllowAnonymous();
 app.MapGet("/healthz", () => Results.Ok(new
 {
     status = "ok",
     env = app.Environment.EnvironmentName,
     timeUtc = DateTimeOffset.UtcNow
-}));
+})).AllowAnonymous();
 app.MapGet("/__debug/headers", (HttpRequest req) =>
     Results.Json(req.Headers.ToDictionary(h => h.Key, h => h.Value.ToString()))
-);
-app.UseEndpoints(endpoints =>
-{
-    endpoints.MapControllers(); // Map controllers
-    endpoints.MapHub<NotificationsHub>("/notificationsHub"); // Map SignalR hub
-});
+).AllowAnonymous();
 
+// Map your real endpoints
+app.MapControllers();                                   // attribute-routed controllers
+app.MapHub<NotificationsHub>("/notificationsHub");      // SignalR hub
+
+// Hangfire
+app.UseHangfireDashboard("/hangfire");
+// Recurring jobs
+RecurringJob.AddOrUpdate<IRandomizePLantHealthJob>(
+    "RandomizePlantHealth",
+    job => job.RandomlyAdjustStateOfThePlant(),
+    Cron.Hourly
+);
+
+// Swagger (enable temporarily in prod if you need)
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
