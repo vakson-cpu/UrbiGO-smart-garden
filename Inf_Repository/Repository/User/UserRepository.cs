@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Inf_Repository.Repository.User;
 
-public class UserRepository : GenericRepository<AppUser>,IUserRepository
+public class UserRepository : GenericRepository<AppUser>, IUserRepository
 {
     private  InfDbContext _context { get; set; }
     
@@ -19,5 +19,18 @@ public class UserRepository : GenericRepository<AppUser>,IUserRepository
     {
         var result = await _context.Users.ToListAsync();
         return result;
+    }
+
+    public async Task<AppUser> GetUserDetails(int userId)
+    {
+        var result = await _context.Users.Where(x=>x.Id == userId).Include(x=>x.Plants).FirstOrDefaultAsync();
+        if (result is null)
+            return null!;
+        return result;
+    }
+
+    public async Task SaveChanges()
+    {
+        await _context.SaveChangesAsync();
     }
 }

@@ -1,9 +1,8 @@
 ﻿using Inf_Data.Entities;
 using Inf_Repository.Repository.User;
 using Inf_Transfer.utils;
-using Microsoft.AspNetCore.Mvc.RazorPages;
+using Inf_Transfer.utils.CustomExceptions;
 using Microsoft.EntityFrameworkCore;
-using System.Numerics;
 
 namespace Inf_api.Services.UserServices
 {
@@ -44,5 +43,31 @@ namespace Inf_api.Services.UserServices
             
         }
 
+
+        public async Task BanUser(int userId)
+        {
+            var result = await _userRepository.GetById(userId);
+            if (result is null)
+                throw  new ArgumentNullException("User not found ...");
+            result.IsBanned = true;
+            await _userRepository.SaveChanges();
+
+        }
+
+        public async Task UnBanUser(int userId)
+        {
+            var result = await _userRepository.GetById(userId);
+            if (result is null)
+                throw new ArgumentNullException("User not found ...");
+            result.IsBanned = true;
+            await _userRepository.SaveChanges();
+        }
+
+        public async Task<AppUser> GetUserDetail(int userId)
+        {
+            var result = await _userRepository.GetUserDetails(userId) ?? throw new UserNotFoundException(userId);
+
+            return result;
+        }
     }
 }

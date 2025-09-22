@@ -58,5 +58,26 @@ namespace Inf_api.Controllers
             return Ok(result);
         }
 
+        [HttpPut("{userId}/ban")]
+        public async Task<IActionResult> BanUser(int userId)
+        {
+            await _userService.BanUser(userId);
+            return Ok("Banned user");
+
+        }
+
+        [HttpPut("{userId}/unban")]
+        public async Task<IActionResult> Unban(int userId)
+        {
+            await _userService.UnBanUser(userId);
+            return Ok("Unbanned user");
+        }
+
+        [HttpGet("UserDetail/{userId}")]
+        public async Task<IActionResult> GetUserDetail(int userId)
+        {
+            var result = await _userService.GetUserDetail(userId);
+            return Ok(result);
+        }
     }
 }
