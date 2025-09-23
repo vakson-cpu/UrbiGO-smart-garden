@@ -72,10 +72,9 @@ RecurringJob.AddOrUpdate<IRandomizePLantHealthJob>(
 );
 
 // Swagger (enable temporarily in prod if you need)
-if (app.Environment.IsDevelopment())
-{
+
     app.UseSwagger();
     app.UseSwaggerUI();
-}
+
 
 app.Run();
