@@ -31,7 +31,7 @@ namespace Inf_api.Jobs
             var plants = await _plantRepository
                 .GetAllWithTracking()
                 .Include(x=>x.Device)
-                .Where(x=>x.PlantHealth != Inf_Data.Enums.PlantHealthEnum.DEAD && x.Device is not null)
+                .Where(x=>x.PlantHealth != Inf_Data.Enums.PlantHealthEnum.DEAD && x.Device != null)
                 .Include(x => x.PlantSpecification)
                 .ToListAsync();
 
