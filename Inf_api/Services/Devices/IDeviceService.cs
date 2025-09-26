@@ -7,6 +7,8 @@ namespace Inf_api.Services.Devices
         Task<List<Device>> GetUsersSmartDevices(int userId);
 
         Task AssingPlantToDevice(int plantId, int deviceId);
+
+        Task SeedDevicesForNewUserAsync(int userId, int count = 5);
     }
 
 }

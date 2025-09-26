@@ -31,5 +31,34 @@ namespace Inf_api.Services.Devices
             return await result.ToListAsync();
 
        }
+
+        public async Task SeedDevicesForNewUserAsync(int userId, int count = 5)
+        {
+            // Idempotency: if user already has devices, skip
+            var alreadyHas = await _unitOfWork.DeviceRepository
+                .GetAll()
+                .AnyAsync(d => d.AssignedToUserId == userId);
+
+            if (alreadyHas) return;
+
+            var devices = Enumerable.Range(1, count).Select(i => new Device
+            {
+                Name = $"Device {i}",
+                SerialNumber = GenerateSerial(),      // make it unique-ish
+                AssignedToUserId = userId,
+                PlantToMonitorId = null
+            }).ToList();
+
+            // If your repo has AddRangeAsync, use it. Otherwise loop .Add
+            foreach (var d in devices)
+                await _unitOfWork.DeviceRepository.Create(d);
+
+        }
+        private static int GenerateSerial()
+        {
+            Random _rng = new Random();
+            // Range 100000–999999 (inclusive), always 6 digits
+            return _rng.Next(100000, 1000000);
+        }
     }
 }

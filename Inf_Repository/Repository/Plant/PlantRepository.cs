@@ -34,7 +34,8 @@ namespace Inf_Repository.Repository.Plant
                     .FirstOrDefaultAsync();
 
                 if (result is null) return null;
-
+                if (result.Count == 0)
+                    throw new Exception("No more plant species left");
                 // Initialize Random instance
                 Random random = new Random();
 
